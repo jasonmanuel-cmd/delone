@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Haulr — Same-Day Delivery, Hauling & Dispatch in One Platform</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            50: '#eff6ff',
+            100: '#dbeafe',
+            500: '#2563eb',
+            600: '#1d4ed8',
+            700: '#1e40af',
+            900: '#0c1e5e'
+          },
+          ink: {
+            900: '#0f172a',
+            800: '#1e293b',
+            700: '#334155',
+            500: '#64748b'
+          },
+          flame: {
+            400: '#fb923c',
+            500: '#f97316',
+            600: '#ea580c'
+          }
+        },
+        fontFamily: {
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+          display: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', sans-serif; color: #0f172a; }
+  .font-display { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+  /* Subtle grid */
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(15,23,42,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15,23,42,0.05) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  .bg-radial-blue {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(37,99,235,0.18), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(249,115,22,0.10), transparent 60%);
+  }
+
+  /* Map / route animation */
+  .route-dash {
+    stroke-dasharray: 8 8;
+    animation: dash 1.5s linear infinite;
+  }
+  @keyframes dash {
+    to { stroke-dashoffset: -32; }
+  }
+  .pulse-dot {
+    animation: pulse 1.6s ease-out infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(3.5); opacity: 0; }
+  }
+
+  .truck-move { animation: truckPath 8s linear infinite; }
+  @keyframes truckPath {
+    0% { offset-distance: 0%; }
+    100% { offset-distance: 100%; }
+  }
+
+  /* Marquee */
+  .marquee { display: flex; gap: 3rem; animation: marquee 28s linear infinite; }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .glow-btn {
+    box-shadow: 0 10px 30px -10px rgba(37,99,235,0.5), inset 0 0 0 1px rgba(255,255,255,0.15);
+  }
+  .flame-glow {
+    box-shadow: 0 10px 30px -10px rgba(249,115,22,0.6);
+  }
+
+  .card-hover { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+  .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 50px -20px rgba(15,23,42,0.25); }
+
+  .step-line::before {
+    content:''; position:absolute; left:50%; top:100%; width:2px; height:48px;
+    background: linear-gradient(to bottom, #cbd5e1, transparent);
+  }
+
+  /* Sticky nav blur */
+  .nav-blur { backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); }
+
+  /* Soft animated gradient on hero badge */
+  .badge-shine {
+    background: linear-gradient(110deg, #1e40af 30%, #3b82f6 50%, #1e40af 70%);
+    background-size: 200% 100%;
+    animation: shine 4s linear infinite;
+  }
+  @keyframes shine { to { background-position: -200% 0; } }
+
+  /* Brand name cards hover */
+  .name-card:hover .name-glow { opacity: 1; }
+  .name-glow { transition: opacity .3s ease; }
+
+  /* Driver app frame */
+  .phone-frame {
+    border-radius: 36px;
+    background: linear-gradient(180deg,#0f172a,#1e293b);
+    box-shadow: 0 30px 80px -20px rgba(15,23,42,0.5), inset 0 0 0 1px rgba(255,255,255,0.05);
+  }
+
+  details[open] .chev { transform: rotate(180deg); }
+  .chev { transition: transform .2s ease; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+</style>
+</head>
+<body class="bg-white">
+
+<!-- ================= NAV ================= -->
+<header class="fixed top-0 inset-x-0 z-50 nav-blur bg-white/75 border-b border-slate-200/60">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between">
+    <a href="#top" class="flex items-center gap-2">
+      <div class="h-9 w-9 rounded-xl bg-brand-700 grid place-items-center text-white font-display font-extrabold">
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+      </div>
+      <div>
+        <p class="font-display font-bold text-white">Product</p>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li><a href="#services" class="hover:text-white">Services</a></li>
+          <li><a href="#pricing" class="hover:text-white">Pricing</a></li>
+          <li><a href="#tracking" class="hover:text-white">Tracking</a></li>
+          <li><a href="#brand-lab" class="hover:text-white">Brand Lab</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="font-display font-bold text-white">Company</p>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li><a href="#how" class="hover:text-white">How it works</a></li>
+          <li><a href="#drivers" class="hover:text-white">Drivers</a></li>
+          <li><a href="#merchants" class="hover:text-white">For Business</a></li>
+          <li><a href="#cta" class="hover:text-white">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="font-display font-bold text-white">Support</p>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li><a href="#how" class="hover:text-white">Help Center</a></li>
+          <li><a href="#drivers" class="hover:text-white">Safety</a></li>
+          <li><a href="#merchants" class="hover:text-white">API Docs</a></li>
+          <li><a href="#tracking" class="hover:text-white">Status</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-xs text-slate-400">
+      <p>© 2026 Haulr. Built for local logistics, delivery, and hauling.</p>
+      <div class="flex gap-4">
+        <a href="#top" class="hover:text-white">Privacy</a>
+        <a href="#top" class="hover:text-white">Terms</a>
+        <a href="#top" class="hover:text-white">Accessibility</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
+      <div>
+        <p class="font-display font-bold text-white">Product</p>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li><a href="#services" class="hover:text-white">Services</a></li>
+          <li><a href="#pricing" class="hover:text-white">Pricing</a></li>
+          <li><a href="#tracking" class="hover:text-white">Tracking</a></li>
+          <li><a href="#brand-lab" class="hover:text-white">Brand Lab</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="font-display font-bold text-white">Company</p>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li><a href="#how" class="hover:text-white">How it works</a></li>
+          <li><a href="#drivers" class="hover:text-white">Drivers</a></li>
+          <li><a href="#merchants" class="hover:text-white">For Business</a></li>
+          <li><a href="#cta" class="hover:text-white">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="font-display font-bold text-white">Support</p>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li><a href="#how" class="hover:text-white">Help Center</a></li>
+          <li><a href="#drivers" class="hover:text-white">Safety</a></li>
+          <li><a href="#merchants" class="hover:text-white">API Docs</a></li>
+          <li><a href="#tracking" class="hover:text-white">Status</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-xs text-slate-400">
+      <p>© 2026 Haulr. Built for local logistics, delivery, and hauling.</p>
+      <div class="flex gap-4">
+        <a href="#top" class="hover:text-white">Privacy</a>
+        <a href="#top" class="hover:text-white">Terms</a>
+        <a href="#top" class="hover:text-white">Accessibility</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
+      <span class="font-display font-extrabold text-lg tracking-tight">Haulr<span class="text-flame-500">.</span></span>
+    </a>
+    <nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-ink-700">
+      <a href="#services" class="hover:text-brand-700">Services</a>
+      <a href="#how" class="hover:text-brand-700">How it works</a>
+      <a href="#pricing" class="hover:text-brand-700">Pricing</a>
+      <a href="#tracking" class="hover:text-brand-700">Live Tracking</a>
+      <a href="#merchants" class="hover:text-brand-700">For Business</a>
+      <a href="#drivers" class="hover:text-brand-700">Drivers</a>
+      <a href="#brand-lab" class="hover:text-brand-700">Brand Lab</a>
+    </nav>
+    <div class="flex items-center gap-2">
+      <a href="#top" class="hidden sm:inline text-sm font-semibold text-ink-800 px-4 py-2 rounded-lg hover:bg-slate-100">Sign in</a>
+      <a href="#cta" class="text-sm font-semibold text-white bg-brand-700 hover:bg-brand-600 px-4 py-2.5 rounded-lg glow-btn">Book a Delivery</a>
+    </div>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section id="top" class="relative pt-28 pb-20 lg:pt-36 lg:pb-28 bg-radial-blue overflow-hidden">
+  <div class="absolute inset-0 bg-grid opacity-60 pointer-events-none"></div>
+  <div class="relative max-w-7xl mx-auto px-5 lg:px-8 grid lg:grid-cols-12 gap-12 items-center">
+    <div class="lg:col-span-7">
+      <div class="inline-flex items-center gap-2 badge-shine text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+        <span class="h-1.5 w-1.5 rounded-full bg-flame-400 animate-pulse"></span>
+        Live in 28 cities • 4,200+ active drivers
+      </div>
+      <h1 class="mt-5 font-display font-extrabold text-5xl sm:text-6xl lg:text-7xl tracking-tight leading-[0.95] text-ink-900">
+        Move anything,<br/>
+        <span class="text-brand-700">anywhere local</span><br/>
+        <span class="relative inline-block">in hours
+          <svg class="absolute -bottom-2 left-0 w-full" height="14" viewBox="0 0 240 14"><path d="M2 10 C 60 2, 160 14, 238 6" stroke="#f97316" stroke-width="4" fill="none" stroke-linecap="round"/></svg>
+        </span>.
+      </h1>
+      <p class="mt-6 text-lg text-ink-700 max-w-xl">
+        Haulr is the all-in-one logistics platform for <span class="font-semibold text-ink-900">same-day delivery, hauling, bulky-item moves, and business dispatch</span>. One app. One dashboard. Every load handled.
+      </p>
+      <div class="mt-8 flex flex-col sm:flex-row gap-3">
+        <a href="#cta" class="inline-flex items-center justify-center gap-2 bg-brand-700 hover:bg-brand-600 text-white font-semibold px-6 py-4 rounded-xl glow-btn">
+          Get a Quote in 30 sec
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 12h15"/></svg>
+        </a>
+        <a href="#how" class="inline-flex items-center justify-center gap-2 bg-white border border-slate-200 hover:border-slate-300 text-ink-900 font-semibold px-6 py-4 rounded-xl">
+          See how it works
+        </a>
+      </div>
+      <div class="mt-10 flex items-center gap-6">
+        <div class="flex -space-x-2">
+          <div class="h-9 w-9 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 border-2 border-white"></div>
+          <div class="h-9 w-9 rounded-full bg-gradient-to-br from-flame-400 to-flame-600 border-2 border-white"></div>
+          <div class="h-9 w-9 rounded-full bg-gradient-to-br from-ink-700 to-ink-900 border-2 border-white"></div>
+          <div class="h-9 w-9 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 border-2 border-white"></div>
+        </div>
+        <div>
+          <div class="flex items-center gap-1 text-flame-500">
+            <!-- stars -->
+            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M10 1l2.6 6 6.4.5-4.9 4.2 1.5 6.3L10 14.8 4.4 18l1.5-6.3L1 7.5 7.4 7z"/></svg>
+            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M10 1l2.6 6 6.4.5-4.9 4.2 1.5 6.3L10 14.8 4.4 18l1.5-6.3L1 7.5 7.4 7z"/></svg>
+            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M10 1l2.6 6 6.4.5-4.9 4.2 1.5 6.3L10 14.8 4.4 18l1.5-6.3L1 7.5 7.4 7z"/></svg>
+            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M10 1l2.6 6 6.4.5-4.9 4.2 1.5 6.3L10 14.8 4.4 18l1.5-6.3L1 7.5 7.4 7z"/></svg>
+            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M10 1l2.6 6 6.4.5-4.9 4.2 1.5 6.3L10 14.8 4.4 18l1.5-6.3L1 7.5 7.4 7z"/></svg>
+            <span class="ml-2 text-sm font-semibold text-ink-900">4.9/5</span>
+          </div>
+          <p class="text-xs text-ink-500">from 12,800+ deliveries this month</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero map card -->
+    <div class="lg:col-span-5 relative">
+      <div class="relative bg-white rounded-3xl border border-slate-200 shadow-2xl shadow-brand-700/10 overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-slate-100 bg-slate-50">
+          <div class="flex items-center gap-2">
+            <span class="h-2.5 w-2.5 rounded-full bg-flame-500"></span>
+            <span class="text-xs font-semibold text-ink-700">Live route • Driver Marcus K.</span>
+          </div>
+          <span class="text-xs font-semibold text-brand-700 bg-brand-50 px-2 py-1 rounded-full">ETA 14 min</span>
+        </div>
+        <!-- Map SVG -->
+        <div class="relative aspect-[4/3] bg-[#eef4ff]">
+          <svg viewBox="0 0 400 300" class="absolute inset-0 w-full h-full">
+            <defs>
+              <pattern id="streets" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#cfdcf3" stroke-width="1"/>
+              </pattern>
+              <linearGradient id="route" x1="0" x2="1">
+                <stop offset="0" stop-color="#1d4ed8"/>
+                <stop offset="1" stop-color="#f97316"/>
+              </linearGradient>
+            </defs>
+            <rect width="400" height="300" fill="url(#streets)"/>
+            <!-- main roads -->
+            <path d="M0 90 H400" stroke="#9bb3df" stroke-width="6"/>
+            <path d="M0 200 H400" stroke="#9bb3df" stroke-width="5"/>
+            <path d="M120 0 V300" stroke="#9bb3df" stroke-width="5"/>
+            <path d="M280 0 V300" stroke="#9bb3df" stroke-width="6"/>
+            <!-- park -->
+            <rect x="180" y="120" width="70" height="60" rx="8" fill="#cfe9d4"/>
+            <!-- water -->
+            <path d="M0 240 Q 100 220 200 250 T 400 240 L 400 300 L 0 300 Z" fill="#bcd6f5"/>
+            <!-- route -->
+            <path id="routePath" d="M40 250 L 120 250 L 120 90 L 280 90 L 280 50 L 360 50"
+                  stroke="url(#route)" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M40 250 L 120 250 L 120 90 L 280 90 L 280 50 L 360 50"
+                  stroke="white" stroke-width="2" fill="none" class="route-dash" stroke-linecap="round"/>
+            <!-- pickup -->
+            <g transform="translate(40,250)">
+              <circle r="14" fill="white"/>
+              <circle r="14" class="pulse-dot" fill="#1d4ed8" opacity="0.4"/>
+              <circle r="8" fill="#1d4ed8"/>
+            </g>
+            <!-- dropoff -->
+            <g transform="translate(360,50)">
+              <circle r="14" fill="white"/>
+              <circle r="8" fill="#f97316"/>
+            </g>
+            <!-- truck along path -->
+            <g style="offset-path: path('M40 250 L 120 250 L 120 90 L 280 90 L 280 50 L 360 50'); offset-rotate:0deg;" class="truck-move">
+              <g transform="translate(-14,-12)">
+                <rect width="28" height="20" rx="4" fill="#0f172a"/>
+                <rect x="3" y="3" width="14" height="10" rx="2" fill="#fb923c"/>
+                <circle cx="8" cy="22" r="3" fill="#0f172a"/>
+                <circle cx="22" cy="22" r="3" fill="#0f172a"/>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <div class="p-5 grid grid-cols-3 gap-3 border-t border-slate-100">
+          <div>
+            <p class="text-[10px] font-semibold text-ink-500 uppercase tracking-wider">Pickup</p>
+            <p class="text-sm font-semibold text-ink-900">Warehouse 4B</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-semibold text-ink-500 uppercase tracking-wider">Dropoff</p>
+            <p class="text-sm font-semibold text-ink-900">812 Oak St.</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-semibold text-ink-500 uppercase tracking-wider">Cost</p>
+            <p class="text-sm font-semibold text-ink-900">$47.20</p>
+          </div>
+        </div>
+      </div>
+      <!-- Floating stats -->
+      <div class="hidden md:block absolute -left-8 -bottom-6 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 w-56">
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded-xl bg-flame-500/10 grid place-items-center text-flame-500">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12"/></svg>
+          </div>
+          <div>
+            <p class="text-2xl font-display font-extrabold text-ink-900">38<span class="text-flame-500">m</span></p>
+            <p class="text-xs text-ink-500">avg delivery time</p>
+          </div>
+        </div>
+      </div>
+      <div class="hidden md:block absolute -right-6 -top-6 bg-ink-900 text-white rounded-2xl shadow-xl p-4 w-52">
+        <p class="text-xs text-slate-300">Drivers nearby</p>
+        <p class="text-3xl font-display font-extrabold">17</p>
+        <div class="mt-1 h-1.5 w-full bg-white/10 rounded-full overflow-hidden"><div class="h-full w-3/4 bg-flame-500"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logos marquee -->
+  <div class="relative mt-16 overflow-hidden border-y border-slate-200/70 py-5 bg-white/60">
+    <div class="marquee whitespace-nowrap text-ink-500 font-display font-bold text-xl tracking-tight opacity-70">
+      <span>NORTH POINT FURNITURE</span><span>•</span>
+      <span>BLUEBARN GROCERS</span><span>•</span>
+      <span>STEELCITY HARDWARE</span><span>•</span>
+      <span>METRO RESTAURANT GROUP</span><span>•</span>
+      <span>RIVERSIDE BUILDERS</span><span>•</span>
+      <span>OAKWOOD APPLIANCE</span><span>•</span>
+      <span>NORTH POINT FURNITURE</span><span>•</span>
+      <span>BLUEBARN GROCERS</span><span>•</span>
+      <span>STEELCITY HARDWARE</span><span>•</span>
+      <span>METRO RESTAURANT GROUP</span><span>•</span>
+      <span>RIVERSIDE BUILDERS</span><span>•</span>
+      <span>OAKWOOD APPLIANCE</span><span>•</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SERVICES ================= -->
+<section id="services" class="py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-14">
+      <div>
+        <p class="text-flame-500 font-semibold text-sm uppercase tracking-widest">What we move</p>
+        <h2 class="mt-3 font-display font-extrabold text-4xl sm:text-5xl tracking-tight text-ink-900 max-w-2xl">Four services. <span class="text-brand-700">One platform.</span> Zero hassle.</h2>
+      </div>
+      <p class="text-ink-700 max-w-md">From a single envelope to a full pickup truck of debris, Haulr matches the right vehicle and operator to every job — automatically.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <!-- Card 1 -->
+      <div class="card-hover bg-white rounded-2xl border border-slate-200 p-6 relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-brand-50"></div>
+        <div class="relative">
+          <div class="h-12 w-12 rounded-xl bg-brand-700 text-white grid place-items-center">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-7h14l2 7M3 12v6h18v-6M3 12h18M7 18v2M17 18v2"/></svg>
+          </div>
+          <h3 class="mt-5 font-display font-extrabold text-xl text-ink-900">Same-Day Delivery</h3>
+          <p class="mt-2 text-sm text-ink-700">Door-to-door packages, parts, and supplies delivered in under 4 hours.</p>
+          <ul class="mt-4 space-y-1.5 text-sm text-ink-700">
+            <li class="flex gap-2"><span class="text-brand-700">→</span> Sub-60 min rush option</li>
+            <li class="flex gap-2"><span class="text-brand-700">→</span> Photo proof of delivery</li>
+            <li class="flex gap-2"><span class="text-brand-700">→</span> $0 surge before 6PM</li>
+          </ul>
+        </div>
+      </div>
+      <!-- Card 2 -->
+      <div class="card-hover bg-white rounded-2xl border border-slate-200 p-6 relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-flame-500/10"></div>
+        <div class="relative">
+          <div class="h-12 w-12 rounded-xl bg-flame-500 text-white grid place-items-center flame-glow">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h13v8H3zM16 10h3l2 3v2h-5M5 17h.01M18 17h.01M7 17a2 2 0 104 0 2 2 0 00-4 0zm10 0a2 2 0 104 0 2 2 0 00-4 0z"/></svg>
+          </div>
+          <h3 class="mt-5 font-display font-extrabold text-xl text-ink-900">Hauling & Junk Removal</h3>
+          <p class="mt-2 text-sm text-ink-700">Yard waste, construction debris, attic cleanouts — gone the same day.</p>
+          <ul class="mt-4 space-y-1.5 text-sm text-ink-700">
+            <li class="flex gap-2"><span class="text-flame-500">→</span> 1/4, 1/2, full truck pricing</li>
+            <li class="flex gap-2"><span class="text-flame-500">→</span> Eco-friendly disposal</li>
+            <li class="flex gap-2"><span class="text-flame-500">→</span> Loading included</li>
+          </ul>
+        </div>
+      </div>
+      <!-- Card 3 -->
+      <div class="card-hover bg-white rounded-2xl border border-slate-200 p-6 relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-brand-50"></div>
+        <div class="relative">
+          <div class="h-12 w-12 rounded-xl bg-brand-700 text-white grid place-items-center">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 21V8l8-5 8 5v13M9 21v-6h6v6"/></svg>
+          </div>
+          <h3 class="mt-5 font-display font-extrabold text-xl text-ink-900">Bulky-Item Moves</h3>
+          <p class="mt-2 text-sm text-ink-700">Couches, treadmills, appliances. Two pros, padded straps, stairs included.</p>
+          <ul class="mt-4 space-y-1.5 text-sm text-ink-700">
+            <li class="flex gap-2"><span class="text-brand-700">→</span> Two-person lift teams</li>
+            <li class="flex gap-2"><span class="text-brand-700">→</span> Damage protection $2K</li>
+            <li class="flex gap-2"><span class="text-brand-700">→</span> Disassembly available</li>
+          </ul>
+        </div>
+      </div>
+      <!-- Card 4 -->
+      <div class="card-hover bg-ink-900 text-white rounded-2xl border border-ink-800 p-6 relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-brand-700/40"></div>
+        <div class="relative">
+          <div class="h-12 w-12 rounded-xl bg-flame-500 text-white grid place-items-center">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17H5a2 2 0 01-2-2V7a2 2 0 012-2h10a2 2 0 012 2v2M13 13h6a2 2 0 012 2v4a2 2 0 01-2 2h-6a2 2 0 01-2-2v-4a2 2 0 012-2z"/></svg>
+          </div>
+          <span class="absolute top-0 right-0 text-[10px] font-bold uppercase tracking-wider bg-flame-500 text-white px-2 py-1 rounded-full">For Business</span>
+          <h3 class="mt-5 font-display font-extrabold text-xl">Business Dispatch</h3>
+          <p class="mt-2 text-sm text-slate-300">A live ops console for your fleet — or ours. Route, assign, track.</p>
+          <ul class="mt-4 space-y-1.5 text-sm text-slate-300">
+            <li class="flex gap-2"><span class="text-flame-400">→</span> API + Shopify plug-in</li>
+            <li class="flex gap-2"><span class="text-flame-400">→</span> Auto-routing & SLA alerts</li>
+            <li class="flex gap-2"><span class="text-flame-400">→</span> Net-30 invoicing</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section id="how" class="py-24 bg-slate-50 relative overflow-hidden">
+  <div class="absolute inset-0 bg-grid opacity-50"></div>
+  <div class="relative max-w-7xl mx-auto px-5 lg:px-8">
+    <div class="text-center max-w-2xl mx-auto mb-16">
+      <p class="text-flame-500 font-semibold text-sm uppercase tracking-widest">How it works</p>
+      <h2 class="mt-3 font-display font-extrabold text-4xl sm:text-5xl tracking-tight text-ink-900">From book to drop in <span class="text-brand-700">four taps</span>.</h2>
+      <p class="mt-4 text-ink-700">No phone calls. No estimates. No waiting on hold. Just a clean, fast workflow that scales from one delivery to one thousand.</p>
+    </div>
+
+    <div class="grid md:grid-cols-4 gap-6 relative">
+      <!-- step -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 relative">
+        <div class="text-flame-500 font-display font-extrabold text-5xl">01</div>
+        <h3 class="mt-2 font-display font-extrabold text-lg text-ink-900">Tell us the load</h3>
+        <p class="mt-2 text-sm text-ink-700">Snap a photo or pick a vehicle size. We auto-suggest the right one.</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 relative">
+        <div class="text-flame-500 font-display font-extrabold text-5xl">02</div>
+        <h3 class="mt-2 font-display font-extrabold text-lg text-ink-900">Lock the price</h3>
+        <p class="mt-2 text-sm text-ink-700">Upfront cost, no surge math. Pay later for businesses on Net-30.</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 relative">
+        <div class="text-flame-500 font-display font-extrabold text-5xl">03</div>
+        <h3 class="mt-2 font-display font-extrabold text-lg text-ink-900">Track live</h3>
+        <p class="mt-2 text-sm text-ink-700">Watch your driver, get arrival texts, share status with your customer.</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 relative">
+        <div class="text-flame-500 font-display font-extrabold text-5xl">04</div>
+        <h3 class="mt-2 font-display font-extrabold text-lg text-ink-900">Done. Receipt sent.</h3>
+        <p class="mt-2 text-sm text-ink-700">Photo proof, signature, automatic invoice — in your inbox in seconds.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRICING ================= -->
+<section id="pricing" class="py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-14">
+      <div>
+        <p class="text-flame-500 font-semibold text-sm uppercase tracking-widest">Pricing overview</p>
+        <h2 class="mt-3 font-display font-extrabold text-4xl sm:text-5xl tracking-tight text-ink-900 max-w-2xl">Flat. Fair. <span class="text-brand-700">No surprises.</span></h2>
+      </div>
+      <p class="text-ink-700 max-w-md">Choose pay-as-you-go or save with a business plan. Your team, vendors, and customers all see the same clear price.</p>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-5">
+      <!-- Tier 1 -->
+      <div class="rounded-2xl border border-slate-200 p-7 bg-white card-hover">
+        <p class="font-display font-extrabold text-ink-900">Solo</p>
+        <p class="text-sm text-ink-500 mt-1">For one-off moves & deliveries</p>
+        <div class="mt-5 flex items-end gap-1">
+          <span class="font-display font-extrabold text-5xl text-ink-900">$19</span>
+          <span class="text-ink-500 mb-1">starting</span>
+        </div>
+        <a href="#cta" class="mt-6 block text-center w-full bg-slate-100 hover:bg-slate-200 text-ink-900 font-semibold py-3 rounded-xl">Book a job</a>
+        <ul class="mt-6 space-y-2 text-sm text-ink-700">
+          <li class="flex gap-2"><span class="text-brand-700">✓</span> Pay-as-you-go</li>
+          <li class="flex gap-2"><span class="text-brand-700">✓</span> Live tracking</li>
+          <li class="flex gap-2"><span class="text-brand-700">✓</span> Photo proof</li>
+          <li class="flex gap-2"><span class="text-brand-700">✓</span> Damage cover up to $500</li>
+        </ul>
+      </div>
+      <!-- Tier 2 - featured -->
+      <div class="rounded-2xl border-2 border-brand-700 p-7 bg-gradient-to-b from-brand-50 to-white card-hover relative">
+        <span class="absolute -top-3 left-7 bg-flame-500 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">Most popular</span>
+        <p class="font-display font-extrabold text-ink-900">Business</p>
+        <p class="text-sm text-ink-500 mt-1">For shops, restaurants, contractors</p>
+        <div class="mt-5 flex items-end gap-1">
+          <span class="font-display font-extrabold text-5xl text-ink-900">$149</span>
+          <span class="text-ink-500 mb-1">/mo + delivery</span>
+        </div>
+        <a href="#cta" class="mt-6 block text-center w-full bg-brand-700 hover:bg-brand-600 text-white font-semibold py-3 rounded-xl glow-btn">Start 14-day trial</a>
+        <ul class="mt-6 space-y-2 text-sm text-ink-700">
+          <li class="flex gap-2"><span class="text-brand-700">✓</span> 20% off every delivery</li>
+          <li class="flex gap-2"><span class="text-brand-700">✓</span> Net-30 invoicing</li>
+          <li class="flex gap-2"><span class="text-brand-700">✓</span> Shopify, Square, WooCommerce</li>
+          <li class="flex gap-2"><span class="text-brand-700">✓</span> Branded customer tracking</li>
+          <li class="flex gap-2"><span class="text-brand-700">✓</span> Damage cover up to $2K</li>
+        </ul>
+      </div>
+      <!-- Tier 3 -->
+      <div class="rounded-2xl border border-ink-900 p-7 bg-ink-900 text-white card-hover">
+        <p class="font-display font-extrabold">Fleet</p>
+        <p class="text-sm text-slate-300 mt-1">Bring your own drivers + ours</p>
+        <div class="mt-5 flex items-end gap-1">
+          <span class="font-display font-extrabold text-5xl">Custom</span>
+        </div>
+        <a href="#cta" class="mt-6 block text-center w-full bg-flame-500 hover:bg-flame-600 text-white font-semibold py-3 rounded-xl flame-glow">Talk to sales</a>
+        <ul class="mt-6 space-y-2 text-sm text-slate-300">
+          <li class="flex gap-2"><span class="text-flame-400">✓</span> Hybrid fleet dispatch</li>
+          <li class="flex gap-2"><span class="text-flame-400">✓</span> Custom SLAs</li>
+          <li class="flex gap-2"><span class="text-flame-400">✓</span> API + webhooks</li>
+          <li class="flex gap-2"><span class="text-flame-400">✓</span> Dedicated ops manager</li>
+          <li class="flex gap-2"><span class="text-flame-400">✓</span> Damage cover up to $10K</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Comparison table -->
+    <div class="mt-16">
+      <h3 class="font-display font-extrabold text-2xl text-ink-900 mb-6">Compare every feature</h3>
+      <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 text-ink-900 font-display font-extrabold">
+            <tr>
+              <th class="text-left px-5 py-4">Feature</th>
+              <th class="px-5 py-4">Solo</th>
+              <th class="px-5 py-4 bg-brand-50 text-brand-700">Business</th>
+              <th class="px-5 py-4 bg-ink-900 text-white">Fleet</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr><td class="px-5 py-3.5 text-ink-700">Same-day delivery</td><td class="text-center">✓</td><td class="text-center bg-brand-50/40">✓</td><td class="text-center">✓</td></tr>
+            <tr><td class="px-5 py-3.5 text-ink-700">Hauling & junk removal</td><td class="text-center">✓</td><td class="text-center bg-brand-50/40">✓</td><td class="text-center">✓</td></tr>
+            <tr><td class="px-5 py-3.5 text-ink-700">Bulky-item two-person lifts</td><td class="text-center">$</td><td class="text-center bg-brand-50/40">✓</td><td class="text-center">✓</td></tr>
+            <tr><td class="px-5 py-3.5 text-ink-700">Branded customer tracking page</td><td class="text-center text-slate-300">—</td><td class="text-center bg-brand-50/40">✓</td><td class="text-center">✓</td></tr>
+            <tr><td class="px-5 py-3.5 text-ink-700">API & webhooks</td><td class="text-center text-slate-300">—</td><td class="text-center bg-brand-50/40">Limited</td><td class="text-center">Unlimited</td></tr>
+            <tr><td class="px-5 py-3.5 text-ink-700">Net-30 invoicing</td><td class="text-center text-slate-300">—</td><td class="text-center bg-brand-50/40">✓</td><td class="text-center">✓</td></tr>
+            <tr><td class="px-5 py-3.5 text-ink-700">Dedicated ops manager</td><td class="text-center text-slate-300">—</td><td class="text-center bg-brand-50/40 text-slate-300">—</td><td class="text-center">✓</td></tr>
+            <tr><td class="px-5 py-3.5 text-ink-700">Damage protection</td><td class="text-center">$500</td><td class="text-center bg-brand-50/40">$2,000</td><td class="text-center">$10,000</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LIVE TRACKING ================= -->
+<section id="tracking" class="py-24 bg-ink-900 text-white relative overflow-hidden">
+  <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 20% 20%, #1d4ed8 0, transparent 40%), radial-gradient(circle at 80% 80%, #f97316 0, transparent 40%)"></div>
+  <div class="relative max-w-7xl mx-auto px-5 lg:px-8 grid lg:grid-cols-2 gap-12 items-center">
+    <div>
+      <p class="text-flame-400 font-semibold text-sm uppercase tracking-widest">Live tracking</p>
+      <h2 class="mt-3 font-display font-extrabold text-4xl sm:text-5xl tracking-tight">Every load on the map. <span class="text-flame-400">Every minute.</span></h2>
+      <p class="mt-4 text-slate-300 max-w-lg">Watch every driver, ETA, and exception in one screen. Send white-label tracking links to customers — no app required.</p>
+
+      <div class="mt-8 space-y-4">
+        <div class="flex gap-4">
+          <div class="h-10 w-10 rounded-xl bg-brand-700 grid place-items-center flex-shrink-0">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.4-2.7A2 2 0 012.5 15.6V8.4A2 2 0 013.6 6.7L9 4l6 3 6-3v12.6a2 2 0 01-1.1 1.7L15 20l-6-3z"/></svg>
+          </div>
+          <div>
+            <h4 class="font-display font-bold">Real-time GPS, every 5 seconds</h4>
+            <p class="text-slate-400 text-sm">Smooth, battery-friendly tracking even in basements and dead zones.</p>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <div class="h-10 w-10 rounded-xl bg-flame-500 grid place-items-center flex-shrink-0">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-2A2 2 0 0118 14V11a6 6 0 10-12 0v3a2 2 0 01-.6 1.4L4 17h5m6 0a3 3 0 11-6 0"/></svg>
+          </div>
+          <div>
+            <h4 class="font-display font-bold">SMS & email auto-alerts</h4>
+            <p class="text-slate-400 text-sm">"Driver 5 min away," "Delivered," "Photo attached" — all automatic.</p>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <div class="h-10 w-10 rounded-xl bg-white text-ink-900 grid place-items-center flex-shrink-0">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M5 10v10h14V10M9 6V4h6v2"/></svg>
+          </div>
+          <div>
+            <h4 class="font-display font-bold">Exceptions, fixed fast</h4>
+            <p class="text-slate-400 text-sm">If a driver stalls for 10 min, ops gets paged before your customer notices.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard preview -->
+    <div class="relative">
+      <div class="bg-slate-900 rounded-3xl border border-white/10 overflow-hidden shadow-2xl">
+        <div class="flex items-center gap-1.5 px-4 py-3 border-b border-white/5">
+          <span class="h-2.5 w-2.5 rounded-full bg-flame-500"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-yellow-400"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+          <span class="ml-3 text-xs text-slate-400">haulr.app/dispatch</span>
+        </div>
+        <div class="grid grid-cols-3">
+          <!-- side panel -->
+          <div class="col-span-1 border-r border-white/5 p-4 space-y-3">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Active jobs · 12</p>
+            <div class="bg-white/5 rounded-xl p-3 border border-flame-500/40">
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-bold">#A-2418</span>
+                <span class="text-[10px] bg-flame-500 px-2 py-0.5 rounded-full">RUSH</span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1">Marcus K. · ETA 14m</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-3">
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-bold">#A-2417</span>
+                <span class="text-[10px] bg-emerald-500 px-2 py-0.5 rounded-full">EN ROUTE</span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1">Tasha P. · ETA 22m</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-3">
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-bold">#A-2416</span>
+                <span class="text-[10px] bg-brand-700 px-2 py-0.5 rounded-full">PICKUP</span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1">Diego R. · 4 stops</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-3">
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-bold">#A-2415</span>
+                <span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded-full">QUEUE</span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1">Auto-assign in 2m</p>
+            </div>
+          </div>
+          <!-- map -->
+          <div class="col-span-2 relative bg-[#0b1220] aspect-[4/3]">
+            <svg viewBox="0 0 400 300" class="absolute inset-0 w-full h-full">
+              <defs>
+                <pattern id="d-streets" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+                </pattern>
+              </defs>
+              <rect width="400" height="300" fill="url(#d-streets)"/>
+              <path d="M0 90 H400" stroke="rgba(255,255,255,0.1)" stroke-width="5"/>
+              <path d="M0 200 H400" stroke="rgba(255,255,255,0.1)" stroke-width="4"/>
+              <path d="M120 0 V300" stroke="rgba(255,255,255,0.1)" stroke-width="4"/>
+              <path d="M280 0 V300" stroke="rgba(255,255,255,0.1)" stroke-width="5"/>
+              <!-- routes -->
+              <path d="M40 250 L 120 250 L 120 90 L 280 90" stroke="#fb923c" stroke-width="3" fill="none" class="route-dash"/>
+              <path d="M60 50 L 280 50 L 280 200 L 360 200" stroke="#3b82f6" stroke-width="3" fill="none" class="route-dash"/>
+              <!-- driver dots -->
+              <g><circle cx="120" cy="170" r="14" fill="#fb923c" opacity=".25" class="pulse-dot"/><circle cx="120" cy="170" r="6" fill="#fb923c"/></g>
+              <g><circle cx="220" cy="50" r="14" fill="#3b82f6" opacity=".25" class="pulse-dot"/><circle cx="220" cy="50" r="6" fill="#3b82f6"/></g>
+              <g><circle cx="60" cy="200" r="14" fill="#22c55e" opacity=".25" class="pulse-dot"/><circle cx="60" cy="200" r="6" fill="#22c55e"/></g>
+              <g><circle cx="340" cy="240" r="14" fill="#22c55e" opacity=".25" class="pulse-dot"/><circle cx="340" cy="240" r="6" fill="#22c55e"/></g>
+            </svg>
+            <div class="absolute top-3 left-3 bg-white/10 backdrop-blur rounded-lg px-3 py-1.5 text-xs">
+              <span class="text-slate-300">On-time</span> <span class="font-bold text-emerald-400">96.4%</span>
+            </div>
+            <div class="absolute bottom-3 right-3 bg-white/10 backdrop-blur rounded-lg px-3 py-1.5 text-xs">
+              <span class="text-slate-300">Avg ETA</span> <span class="font-bold text-flame-400">38m</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MERCHANTS ================= -->
+<section id="merchants" class="py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8 grid lg:grid-cols-2 gap-14 items-center">
+    <div class="order-2 lg:order-1">
+      <!-- Mock merchant dashboard -->
+      <div class="bg-slate-50 rounded-3xl border border-slate-200 p-6 shadow-xl">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <p class="text-xs text-ink-500">Today's deliveries</p>
+            <p class="font-display font-extrabold text-3xl text-ink-900">142</p>
+          </div>
+          <div class="flex gap-2">
+            <span class="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">+18% vs last wk</span>
+          </div>
+        </div>
+        <!-- bar chart -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 mb-4">
+          <p class="text-xs text-ink-500 font-semibold mb-4">Delivery volume · last 7 days</p>
+          <div class="flex items-end justify-between gap-2 h-32">
+            <div class="flex-1 flex flex-col items-center gap-2"><div class="w-full bg-brand-100 rounded-t-md" style="height:40%"></div><span class="text-[10px] text-ink-500">M</span></div>
+            <div class="flex-1 flex flex-col items-center gap-2"><div class="w-full bg-brand-100 rounded-t-md" style="height:55%"></div><span class="text-[10px] text-ink-500">T</span></div>
+            <div class="flex-1 flex flex-col items-center gap-2"><div class="w-full bg-brand-100 rounded-t-md" style="height:50%"></div><span class="text-[10px] text-ink-500">W</span></div>
+            <div class="flex-1 flex flex-col items-center gap-2"><div class="w-full bg-brand-100 rounded-t-md" style="height:70%"></div><span class="text-[10px] text-ink-500">T</span></div>
+            <div class="flex-1 flex flex-col items-center gap-2"><div class="w-full bg-brand-700 rounded-t-md" style="height:90%"></div><span class="text-[10px] text-ink-500">F</span></div>
+            <div class="flex-1 flex flex-col items-center gap-2"><div class="w-full bg-flame-500 rounded-t-md" style="height:80%"></div><span class="text-[10px] text-ink-500">S</span></div>
+            <div class="flex-1 flex flex-col items-center gap-2"><div class="w-full bg-brand-100 rounded-t-md" style="height:45%"></div><span class="text-[10px] text-ink-500">S</span></div>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div class="bg-white rounded-xl border border-slate-200 p-3"><p class="text-[10px] text-ink-500 uppercase font-semibold">On-time</p><p class="font-display font-bold text-xl text-ink-900">98%</p></div>
+          <div class="bg-white rounded-xl border border-slate-200 p-3"><p class="text-[10px] text-ink-500 uppercase font-semibold">Avg cost</p><p class="font-display font-bold text-xl text-ink-900">$11.40</p></div>
+          <div class="bg-white rounded-xl border border-slate-200 p-3"><p class="text-[10px] text-ink-500 uppercase font-semibold">Saved hrs</p><p class="font-display font-bold text-xl text-flame-500">26h</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="order-1 lg:order-2">
+      <p class="text-flame-500 font-semibold text-sm uppercase tracking-widest">For merchants & ops teams</p>
+      <h2 class="mt-3 font-display font-extrabold text-4xl sm:text-5xl tracking-tight text-ink-900">Run your local <span class="text-brand-700">delivery ops</span> like Amazon — without the team of 50.</h2>
+      <p class="mt-5 text-ink-700 max-w-lg">Connect Shopify, Square, or your POS in two clicks. New orders auto-route to drivers. Customers get a branded tracker. You get the data.</p>
+      <ul class="mt-7 grid sm:grid-cols-2 gap-3">
+        <li class="flex items-start gap-2 bg-slate-50 rounded-xl p-4 border border-slate-200"><span class="text-brand-700 mt-0.5">●</span><div><p class="font-semibold text-ink-900">Auto-routing</p><p class="text-xs text-ink-500">Stop-optimized in real time</p></div></li>
+        <li class="flex items-start gap-2 bg-slate-50 rounded-xl p-4 border border-slate-200"><span class="text-brand-700 mt-0.5">●</span><div><p class="font-semibold text-ink-900">Branded tracking</p><p class="text-xs text-ink-500">Your logo, your colors</p></div></li>
+        <li class="flex items-start gap-2 bg-slate-50 rounded-xl p-4 border border-slate-200"><span class="text-brand-700 mt-0.5">●</span><div><p class="font-semibold text-ink-900">Hybrid fleet</p><p class="text-xs text-ink-500">Your drivers + ours, one screen</p></div></li>
+        <li class="flex items-start gap-2 bg-slate-50 rounded-xl p-4 border border-slate-200"><span class="text-brand-700 mt-0.5">●</span><div><p class="font-semibold text-ink-900">CSV / API export</p><p class="text-xs text-ink-500">Plug into your stack</p></div></li>
+      </ul>
+      <div class="mt-8 flex gap-3">
+        <a href="#cta" class="inline-flex items-center gap-2 bg-brand-700 hover:bg-brand-600 text-white font-semibold px-5 py-3 rounded-xl glow-btn">Open business account →</a>
+        <a href="#merchants" class="inline-flex items-center gap-2 text-ink-900 font-semibold px-5 py-3 rounded-xl border border-slate-200 hover:bg-slate-50">View API docs</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DRIVERS ================= -->
+<section id="drivers" class="py-24 bg-gradient-to-br from-ink-900 via-brand-900 to-ink-900 text-white relative overflow-hidden">
+  <div class="absolute inset-0 bg-grid opacity-10"></div>
+  <div class="relative max-w-7xl mx-auto px-5 lg:px-8 grid lg:grid-cols-2 gap-12 items-center">
+    <div>
+      <span class="inline-block bg-flame-500 text-white text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">Drive with Haulr</span>
+      <h2 class="mt-4 font-display font-extrabold text-4xl sm:text-5xl tracking-tight">Real jobs. <span class="text-flame-400">Real pay.</span> Same day.</h2>
+      <p class="mt-5 text-slate-300 max-w-lg">No waiting for surge. No mystery fees. Pick the loads that fit your truck and your schedule — keep 85% of every dollar.</p>
+      <div class="mt-8 grid sm:grid-cols-3 gap-3">
+        <div class="bg-white/5 rounded-2xl p-5 border border-white/10">
+          <p class="font-display font-extrabold text-3xl text-flame-400">$32</p>
+          <p class="text-xs text-slate-300 mt-1">avg per hour</p>
+        </div>
+        <div class="bg-white/5 rounded-2xl p-5 border border-white/10">
+          <p class="font-display font-extrabold text-3xl text-flame-400">85%</p>
+          <p class="text-xs text-slate-300 mt-1">driver take-rate</p>
+        </div>
+        <div class="bg-white/5 rounded-2xl p-5 border border-white/10">
+          <p class="font-display font-extrabold text-3xl text-flame-400">24h</p>
+          <p class="text-xs text-slate-300 mt-1">cash-out window</p>
+        </div>
+      </div>
+      <div class="mt-8 flex flex-col sm:flex-row gap-3">
+        <a href="#cta" class="inline-flex items-center justify-center gap-2 bg-flame-500 hover:bg-flame-600 text-white font-semibold px-6 py-3.5 rounded-xl flame-glow">Apply to drive</a>
+        <a href="#drivers" class="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3.5 rounded-xl border border-white/15">See requirements</a>
+      </div>
+    </div>
+
+    <!-- Phone mock -->
+    <div class="relative mx-auto w-full max-w-xs">
+      <div class="phone-frame p-3">
+        <div class="bg-white rounded-3xl overflow-hidden">
+          <div class="bg-ink-900 text-white p-4">
+            <p class="text-[10px] uppercase tracking-widest text-flame-400 font-bold">New job offer</p>
+            <p class="font-display font-extrabold text-xl mt-1">Bulky-item move</p>
+            <p class="text-xs text-slate-300 mt-1">2.4 mi away · 22 min</p>
+          </div>
+          <div class="p-4 space-y-3">
+            <div class="flex justify-between items-center bg-slate-50 rounded-xl p-3">
+              <span class="text-xs text-ink-500">Pay</span>
+              <span class="font-display font-extrabold text-2xl text-ink-900">$84.20</span>
+            </div>
+            <div class="space-y-2 text-sm text-ink-700">
+              <div class="flex items-start gap-2"><span class="h-2 w-2 mt-1.5 rounded-full bg-brand-700"></span><div><p class="font-semibold text-ink-900">412 Walnut Ave</p><p class="text-xs text-ink-500">Pickup · 3 items</p></div></div>
+              <div class="flex items-start gap-2"><span class="h-2 w-2 mt-1.5 rounded-full bg-flame-500"></span><div><p class="font-semibold text-ink-900">88 Riverwood Dr</p><p class="text-xs text-ink-500">Dropoff · 2nd floor</p></div></div>
+            </div>
+            <button class="w-full bg-flame-500 text-white font-bold py-3 rounded-xl flame-glow">Accept job</button>
+            <button class="w-full bg-slate-100 text-ink-700 font-semibold py-3 rounded-xl text-sm">Pass</button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute -right-3 -top-3 bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">⚡ Instant</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BRAND LAB ================= -->
+<section id="brand-lab" class="py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8">
+    <div class="text-center max-w-3xl mx-auto mb-14">
+      <span class="inline-block text-[11px] font-bold tracking-[0.25em] uppercase text-flame-500">Brand Lab · Naming exploration</span>
+      <h2 class="mt-3 font-display font-extrabold text-4xl sm:text-5xl tracking-tight text-ink-900">10 scalable name ideas. <span class="text-brand-700">Pick your shipper.</span></h2>
+      <p class="mt-4 text-ink-700">A founder-ready shortlist of brand names + slogan pairings — each engineered to work for everyday consumers, small businesses, and enterprise dispatch alike.</p>
+    </div>
+
+    <!-- Naming criteria pills -->
+    <div class="flex flex-wrap justify-center gap-2 mb-12">
+      <span class="text-xs font-semibold bg-slate-100 px-3 py-1.5 rounded-full">.com viable</span>
+      <span class="text-xs font-semibold bg-slate-100 px-3 py-1.5 rounded-full">2 syllables or less</span>
+      <span class="text-xs font-semibold bg-slate-100 px-3 py-1.5 rounded-full">Trademark-clear directions</span>
+      <span class="text-xs font-semibold bg-slate-100 px-3 py-1.5 rounded-full">Scales internationally</span>
+      <span class="text-xs font-semibold bg-slate-100 px-3 py-1.5 rounded-full">Sounds confident, not cute</span>
+    </div>
+
+    <!-- Brand grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- 1 -->
+      <div class="name-card relative card-hover bg-white border border-slate-200 rounded-2xl p-6 overflow-hidden">
+        <div class="name-glow absolute -top-20 -right-20 h-48 w-48 bg-brand-700/10 rounded-full opacity-0"></div>
+        <div class="relative">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-ink-500">01</span>
+            <span class="text-[10px] font-bold bg-flame-500/10 text-flame-600 px-2 py-1 rounded-full uppercase tracking-wider">Top Pick</span>
+          </div>
+          <h3 class="mt-4 font-display font-extrabold text-3xl text-ink-900">Haulr<span class="text-flame-500">.</span></h3>
+          <p class="mt-1 text-sm text-ink-500 italic">"Move anything. Locally. In hours."</p>
+          <p class="mt-4 text-sm text-ink-700">Short, action-led, and instantly understood. Doubles as a verb — "I'll Haulr it." Easy to brand into bold typography.</p>
+          <div class="mt-4 flex flex-wrap gap-1.5">
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">Verb-able</span>
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">5 letters</span>
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">Bold</span>
+          </div>
+        </div>
+      </div>
+      <!-- 2 -->
+      <div class="name-card relative card-hover bg-white border border-slate-200 rounded-2xl p-6 overflow-hidden">
+        <div class="name-glow absolute -top-20 -right-20 h-48 w-48 bg-brand-700/10 rounded-full opacity-0"></div>
+        <div class="relative">
+          <span class="text-xs font-bold text-ink-500">02</span>
+          <h3 class="mt-4 font-display font-extrabold text-3xl text-ink-900">Drayve</h3>
+          <p class="mt-1 text-sm text-ink-500 italic">"The drive behind every delivery."</p>
+          <p class="mt-4 text-sm text-ink-700">Plays on "dray" (a freight term) + "drive." Tech-flavored, quick to spell, premium feel.</p>
+          <div class="mt-4 flex flex-wrap gap-1.5">
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">Logistics-rooted</span>
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">SaaS-friendly</span>
+          </div>
+        </div>
+      </div>
+      <!-- 3 -->
+      <div class="name-card relative card-hover bg-white border border-slate-200 rounded-2xl p-6 overflow-hidden">
+        <div class="name-glow absolute -top-20 -right-20 h-48 w-48 bg-brand-700/10 rounded-full opacity-0"></div>
+        <div class="relative">
+          <span class="text-xs font-bold text-ink-500">03</span>
+          <h3 class="mt-4 font-display font-extrabold text-3xl text-ink-900">Loadbox</h3>
+          <p class="mt-1 text-sm text-ink-500 italic">"Every load. One box."</p>
+          <p class="mt-4 text-sm text-ink-700">Workmanlike + platform feel. Hints at packaging the entire ops experience into one tool.</p>
+          <div class="mt-4 flex flex-wrap gap-1.5">
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">Compound</span>
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">B2B leaning</span>
+          </div>
+        </div>
+      </div>
+      <!-- 4 -->
+      <div class="name-card relative card-hover bg-white border border-slate-200 rounded-2xl p-6 overflow-hidden">
+        <div class="name-glow absolute -top-20 -right-20 h-48 w-48 bg-brand-700/10 rounded-full opacity-0"></div>
+        <div class="relative">
+          <span class="text-xs font-bold text-ink-500">04</span>
+          <h3 class="mt-4 font-display font-extrabold text-3xl text-ink-900">Truckly</h3>
+          <p class="mt-1 text-sm text-ink-500 italic">"Trucks, on tap."</p>
+          <p class="mt-4 text-sm text-ink-700">Friendly consumer skin on a heavy-duty service. Easy to say, easy to share, plays well on TikTok.</p>
+          <div class="mt-4 flex flex-wrap gap-1.5">
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">Consumer</span>
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">Approachable</span>
+          </div>
+        </div>
+      </div>
+      <!-- 5 -->
+      <div class="name-card relative card-hover bg-white border border-slate-200 rounded-2xl p-6 overflow-hidden">
+        <div class="name-glow absolute -top-20 -right-20 h-48 w-48 bg-brand-700/10 rounded-full opacity-0"></div>
+        <div class="relative">
+          <span class="text-xs font-bold text-ink-500">05</span>
+          <h3 class="mt-4 font-display font-extrabold text-3xl text-ink-900">Routly</h3>
+          <p class="mt-1 text-sm text-ink-500 italic">"Smarter routes. Faster jobs."</p>
+          <p class="mt-4 text-sm text-ink-700">Software-forward. Speaks directly to the tech behind the platform. Pairs cleanly with a route-line logo.</p>
+          <div class="mt-4 flex flex-wrap gap-1.5">
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">SaaS</span>
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">Tech-forward</span>
+          </div>
+        </div>
+      </div>
+      <!-- 6 -->
+      <div class="name-card relative card-hover bg-white border border-slate-200 rounded-2xl p-6 overflow-hidden">
+        <div class="name-glow absolute -top-20 -right-20 h-48 w-48 bg-brand-700/10 rounded-full opacity-0"></div>
+        <div class="relative">
+          <span class="text-xs font-bold text-ink-500">06</span>
+          <h3 class="mt-4 font-display font-extrabold text-3xl text-ink-900">Pivot Cargo</h3>
+          <p class="mt-1 text-sm text-ink-500 italic">"Logistics that flex with you."</p>
+          <p class="mt-4 text-sm text-ink-700">Two-word brand for an enterprise position. Suggests adaptability and small-business empowerment.</p>
+          <div class="mt-4 flex flex-wrap gap-1.5">
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">Enterprise</span>
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">Premium</span>
+          </div>
+        </div>
+      </div>
+      <!-- 7 -->
+      <div class="name-card relative card-hover bg-white border border-slate-200 rounded-2xl p-6 overflow-hidden">
+        <div class="name-glow absolute -top-20 -right-20 h-48 w-48 bg-brand-700/10 rounded-full opacity-0"></div>
+        <div class="relative">
+          <span class="text-xs font-bold text-ink-500">07</span>
+          <h3 class="mt-4 font-display font-extrabold text-3xl text-ink-900">Shipspot</h3>
+          <p class="mt-1 text-sm text-ink-500 italic">"Same-day. Same neighborhood."</p>
+          <p class="mt-4 text-sm text-ink-700">Hyper-local positioning. "Spot" doubles as a marker on the map — strong logo system.</p>
+          <div class="mt-4 flex flex-wrap gap-1.5">
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">Local-first</span>
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">Map-friendly</span>
+          </div>
+        </div>
+      </div>
+      <!-- 8 -->
+      <div class="name-card relative card-hover bg-white border border-slate-200 rounded-2xl p-6 overflow-hidden">
+        <div class="name-glow absolute -top-20 -right-20 h-48 w-48 bg-flame-500/10 rounded-full opacity-0"></div>
+        <div class="relative">
+          <span class="text-xs font-bold text-ink-500">08</span>
+          <h3 class="mt-4 font-display font-extrabold text-3xl text-ink-900">Bolt &amp; Bin</h3>
+          <p class="mt-1 text-sm text-ink-500 italic">"Lightning out. Loaded in."</p>
+          <p class="mt-4 text-sm text-ink-700">Workwear-meets-tech. Bin = capacity, Bolt = speed. Strong brand-able mark.</p>
+          <div class="mt-4 flex flex-wrap gap-1.5">
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">Distinctive</span>
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">Storytelling</span>
+          </div>
+        </div>
+      </div>
+      <!-- 9 -->
+      <div class="name-card relative card-hover bg-white border border-slate-200 rounded-2xl p-6 overflow-hidden">
+        <div class="name-glow absolute -top-20 -right-20 h-48 w-48 bg-brand-700/10 rounded-full opacity-0"></div>
+        <div class="relative">
+          <span class="text-xs font-bold text-ink-500">09</span>
+          <h3 class="mt-4 font-display font-extrabold text-3xl text-ink-900">Crateway</h3>
+          <p class="mt-1 text-sm text-ink-500 italic">"Your gateway to local logistics."</p>
+          <p class="mt-4 text-sm text-ink-700">Composite of "crate" + "gateway." Premium, infrastructure feel — pairs with enterprise pricing.</p>
+          <div class="mt-4 flex flex-wrap gap-1.5">
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">Infrastructure</span>
+            <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">Scalable</span>
+          </div>
+        </div>
+      </div>
+      <!-- 10 -->
+      <div class="name-card relative card-hover bg-ink-900 text-white border border-ink-800 rounded-2xl p-6 overflow-hidden">
+        <div class="name-glow absolute -top-20 -right-20 h-48 w-48 bg-flame-500/30 rounded-full opacity-0"></div>
+        <div class="relative">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-400">10</span>
+            <span class="text-[10px] font-bold bg-flame-500 text-white px-2 py-1 rounded-full uppercase tracking-wider">Editor's Pick</span>
+          </div>
+          <h3 class="mt-4 font-display font-extrabold text-3xl">Mainline</h3>
+          <p class="mt-1 text-sm text-slate-300 italic">"The main line for moving stuff."</p>
+          <p class="mt-4 text-sm text-slate-300">Single-word, ownable, confident. Suggests being the dominant local pipeline. Excellent enterprise resonance.</p>
+          <div class="mt-4 flex flex-wrap gap-1.5">
+            <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded-full">Authoritative</span>
+            <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded-full">Iconic</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Naming comparison table -->
+    <div class="mt-16">
+      <h3 class="font-display font-extrabold text-2xl text-ink-900 mb-2">Naming scorecard</h3>
+      <p class="text-ink-700 text-sm mb-6">Each name graded on the same five criteria — sortable shortlist for the founders' room.</p>
+      <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 text-ink-900 font-display font-extrabold">
+            <tr>
+              <th class="text-left px-5 py-4">Name</th>
+              <th class="px-3 py-4">Memorability</th>
+              <th class="px-3 py-4">Trademark</th>
+              <th class="px-3 py-4">Domain</th>
+              <th class="px-3 py-4">B2B Fit</th>
+              <th class="px-3 py-4">B2C Fit</th>
+              <th class="px-3 py-4">Total</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="bg-flame-50/40"><td class="px-5 py-3.5 font-bold text-ink-900">Haulr</td><td class="text-center">9</td><td class="text-center">9</td><td class="text-center">8</td><td class="text-center">9</td><td class="text-center">9</td><td class="text-center font-bold text-flame-600">44</td></tr>
+            <tr><td class="px-5 py-3.5 font-bold text-ink-900">Drayve</td><td class="text-center">8</td><td class="text-center">9</td><td class="text-center">8</td><td class="text-center">9</td><td class="text-center">7</td><td class="text-center font-bold">41</td></tr>
+            <tr><td class="px-5 py-3.5 font-bold text-ink-900">Mainline</td><td class="text-center">9</td><td class="text-center">7</td><td class="text-center">7</td><td class="text-center">10</td><td class="text-center">7</td><td class="text-center font-bold">40</td></tr>
+            <tr><td class="px-5 py-3.5 font-bold text-ink-900">Routly</td><td class="text-center">8</td><td class="text-center">8</td><td class="text-center">8</td><td class="text-center">9</td><td class="text-center">7</td><td class="text-center font-bold">40</td></tr>
+            <tr><td class="px-5 py-3.5 font-bold text-ink-900">Loadbox</td><td class="text-center">8</td><td class="text-center">8</td><td class="text-center">9</td><td class="text-center">8</td><td class="text-center">6</td><td class="text-center font-bold">39</td></tr>
+            <tr><td class="px-5 py-3.5 font-bold text-ink-900">Truckly</td><td class="text-center">9</td><td class="text-center">7</td><td class="text-center">8</td><td class="text-center">6</td><td class="text-center">9</td><td class="text-center font-bold">39</td></tr>
+            <tr><td class="px-5 py-3.5 font-bold text-ink-900">Bolt &amp; Bin</td><td class="text-center">9</td><td class="text-center">9</td><td class="text-center">7</td><td class="text-center">7</td><td class="text-center">7</td><td class="text-center font-bold">39</td></tr>
+            <tr><td class="px-5 py-3.5 font-bold text-ink-900">Shipspot</td><td class="text-center">8</td><td class="text-center">7</td><td class="text-center">8</td><td class="text-center">7</td><td class="text-center">8</td><td class="text-center font-bold">38</td></tr>
+            <tr><td class="px-5 py-3.5 font-bold text-ink-900">Crateway</td><td class="text-center">7</td><td class="text-center">9</td><td class="text-center">9</td><td class="text-center">9</td><td class="text-center">5</td><td class="text-center font-bold">39</td></tr>
+            <tr><td class="px-5 py-3.5 font-bold text-ink-900">Pivot Cargo</td><td class="text-center">7</td><td class="text-center">9</td><td class="text-center">8</td><td class="text-center">9</td><td class="text-center">5</td><td class="text-center font-bold">38</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TESTIMONIALS / FAQ ================= -->
+<section class="py-24 bg-slate-50">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8 grid lg:grid-cols-2 gap-12">
+    <div>
+      <p class="text-flame-500 font-semibold text-sm uppercase tracking-widest">Loved by both sides of the truck</p>
+      <h2 class="mt-3 font-display font-extrabold text-4xl tracking-tight text-ink-900">Trusted by 2,400+ <br/>local businesses.</h2>
+
+      <div class="mt-8 space-y-4">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200">
+          <div class="flex text-flame-500 mb-3">
+            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M10 1l2.6 6 6.4.5-4.9 4.2 1.5 6.3L10 14.8 4.4 18l1.5-6.3L1 7.5 7.4 7z"/></svg>
+            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M10 1l2.6 6 6.4.5-4.9 4.2 1.5 6.3L10 14.8 4.4 18l1.5-6.3L1 7.5 7.4 7z"/></svg>
+            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M10 1l2.6 6 6.4.5-4.9 4.2 1.5 6.3L10 14.8 4.4 18l1.5-6.3L1 7.5 7.4 7z"/></svg>
+            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M10 1l2.6 6 6.4.5-4.9 4.2 1.5 6.3L10 14.8 4.4 18l1.5-6.3L1 7.5 7.4 7z"/></svg>
+            <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M10 1l2.6 6 6.4.5-4.9 4.2 1.5 6.3L10 14.8 4.4 18l1.5-6.3L1 7.5 7.4 7z"/></svg>
+          </div>
+          <p class="text-ink-800">"We replaced two dispatchers and a $400/mo SaaS with Haulr. Same-day rate jumped to 96% and we ship 3x more orders."</p>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="h-10 w-10 rounded-full bg-gradient-to-br from-brand-500 to-brand-700"></div>
+            <div><p class="font-bold text-ink-900 text-sm">Lena Park</p><p class="text-xs text-ink-500">Ops Lead, North Point Furniture</p></div>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200">
+          <p class="text-ink-800">"Booked a hauler for an old hot tub. Two guys showed up in under an hour. Price was exactly what the app quoted."</p>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="h-10 w-10 rounded-full bg-gradient-to-br from-flame-400 to-flame-600"></div>
+            <div><p class="font-bold text-ink-900 text-sm">Marcus T.</p><p class="text-xs text-ink-500">Homeowner, Riverside</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <p class="text-flame-500 font-semibold text-sm uppercase tracking-widest">FAQ</p>
+      <h2 class="mt-3 font-display font-extrabold text-4xl tracking-tight text-ink-900">Quick answers.</h2>
+
+      <div class="mt-8 space-y-3">
+        <details class="group bg-white border border-slate-200 rounded-xl p-5" open>
+          <summary class="flex justify-between items-center cursor-pointer font-display font-bold text-ink-900">
+            How fast can a driver be there?
+            <svg class="chev h-5 w-5 text-ink-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <p class="mt-3 text-sm text-ink-700">In 28 cities, the median pickup time is 22 minutes. Schedule jobs up to 30 days in advance for free.</p>
+        </details>
+        <details class="group bg-white border border-slate-200 rounded-xl p-5">
+          <summary class="flex justify-between items-center cursor-pointer font-display font-bold text-ink-900">
+            What if my item is damaged?
+            <svg class="chev h-5 w-5 text-ink-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <p class="mt-3 text-sm text-ink-700">Every job includes damage protection from $500 (Solo) to $10K (Fleet). Claims close within 72 hours.</p>
+        </details>
+        <details class="group bg-white border border-slate-200 rounded-xl p-5">
+          <summary class="flex justify-between items-center cursor-pointer font-display font-bold text-ink-900">
+            Do you integrate with Shopify?
+            <svg class="chev h-5 w-5 text-ink-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <p class="mt-3 text-sm text-ink-700">Yes — Shopify, WooCommerce, Square, and a public REST API + webhooks for custom builds.</p>
+        </details>
+        <details class="group bg-white border border-slate-200 rounded-xl p-5">
+          <summary class="flex justify-between items-center cursor-pointer font-display font-bold text-ink-900">
+            Are drivers vetted?
+            <svg class="chev h-5 w-5 text-ink-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <p class="mt-3 text-sm text-ink-700">Background checks, MVR review, vehicle photos, and a 5-job probation rating. Drivers below 4.7 are off the platform.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FINAL CTA ================= -->
+<section id="cta" class="py-24 bg-white">
+  <div class="max-w-6xl mx-auto px-5 lg:px-8">
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-700 via-brand-700 to-ink-900 p-10 lg:p-16 text-white">
+      <div class="absolute -top-32 -right-32 h-80 w-80 rounded-full bg-flame-500/30 blur-3xl"></div>
+      <div class="absolute -bottom-32 -left-32 h-80 w-80 rounded-full bg-brand-500/40 blur-3xl"></div>
+      <div class="relative grid lg:grid-cols-2 gap-10 items-center">
+        <div>
+          <p class="text-flame-300 font-semibold uppercase text-xs tracking-widest">Ready when you are</p>
+          <h2 class="mt-3 font-display font-extrabold text-4xl sm:text-5xl tracking-tight">Move it today. <br/>Pay tomorrow.</h2>
+          <p class="mt-4 text-slate-200 max-w-md">Book your first delivery in 30 seconds — or talk to ops about replacing your in-house fleet.</p>
+        </div>
+        <div class="flex flex-col gap-3">
+          <a href="#cta" class="bg-flame-500 hover:bg-flame-600 text-white font-bold py-4 rounded-xl text-center flame-glow text-lg">Book a delivery →</a>
+          <a href="#merchants" class="bg-white text-ink-900 hover:bg-slate-50 font-bold py-4 rounded-xl text-center text-lg">Start a business account</a>
+          <a href="#cta" class="text-white/80 hover:text-white text-center text-sm font-semibold">or, talk to ops →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="bg-ink-900 text-slate-300 pt-16 pb-8">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8">
+    <div class="grid lg:grid-cols-5 gap-10">
+      <div class="lg:col-span-2">
+        <div class="flex items-center gap-2">
+          <div class="h-9 w-9 rounded-xl bg-flame-500 grid place-items-center text-white">
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+          </div>
+          <span class="font-display font-extrabold text-xl text-white">Haulr<span class="text-flame-500">.</span></span>
+        </div>
+        <p class="mt-4 text-sm max-w-sm">The all-in-one local logistics platform: same-day delivery, hauling, bulky-item moves, and business dispatch.</p>
+        <div class="mt-6 flex gap-2">
+          <input type="email" placeholder="you@business.com" class="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm placeholder:text-slate-500 focus:outline-none focus:border-flame-500"/>
+          <button class="bg-flame-500 hover:bg-flame-600 text-white font-semibold px-4 rounded-lg text-sm">Get launch updates</button>
+        </div>
+      </div>
+      <div>
+        <p class="font-display font-bold text-white">Product</p>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li><a href="#services" class="hover:text-white">Services</a></li>
+          <li><a href="#pricing" class="hover:text-white">Pricing</a></li>
+          <li><a href="#tracking" class="hover:text-white">Tracking</a></li>
+          <li><a href="#brand-lab" class="hover:text-white">Brand Lab</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="font-display font-bold text-white">Company</p>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li><a href="#how" class="hover:text-white">How it works</a></li>
+          <li><a href="#drivers" class="hover:text-white">Drivers</a></li>
+          <li><a href="#merchants" class="hover:text-white">For Business</a></li>
+          <li><a href="#cta" class="hover:text-white">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="font-display font-bold text-white">Support</p>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li><a href="#how" class="hover:text-white">Help Center</a></li>
+          <li><a href="#drivers" class="hover:text-white">Safety</a></li>
+          <li><a href="#merchants" class="hover:text-white">API Docs</a></li>
+          <li><a href="#tracking" class="hover:text-white">Status</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-xs text-slate-400">
+      <p>© 2026 Haulr. Built for local logistics, delivery, and hauling.</p>
+      <div class="flex gap-4">
+        <a href="#top" class="hover:text-white">Privacy</a>
+        <a href="#top" class="hover:text-white">Terms</a>
+        <a href="#top" class="hover:text-white">Accessibility</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
